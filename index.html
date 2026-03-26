@@ -154,7 +154,7 @@
 <body>
 
 <div id="loading">
-  <p id="loading-label">Carregant experiència</p>
+  <p id="loading-label"> </p>
   <div id="loading-track"><div id="loading-fill"></div></div>
 </div>
 
@@ -258,10 +258,13 @@
     video.src         = VIDEO_SRC;
     video.muted       = true;
     video.playsInline = true;
-    video.crossOrigin = 'anonymous';
+    video.preload     = 'auto';
+    
 
-    await new Promise(res => {
-      video.addEventListener('loadedmetadata', res, { once: true });
+    await new Promise((res, rej) => {
+      video.addEventListener("loadedmetadata", res, { once: true });
+      video.addEventListener("error", () => rej("error"), { once: true });
+      setTimeout(() => rej("timeout"), 20000);
       video.load();
     });
 
@@ -335,7 +338,7 @@
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
-  extractFrames();
+  extractFrames().catch(e => { document.getElementById("loading-label").textContent = "Error: " + e; });
 </script>
 </body>
 </html>
