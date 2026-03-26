@@ -5,178 +5,306 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Hotel d'Insectes</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    :root { --ink: #1a1612; --muted: #8a7f74; --bg: #faf9f7; }
-    html, body { background: var(--bg); }
+
+    :root {
+      --parchment: #f2ece0;
+      --ink:        #1c1409;
+      --bark:       #6b4c2a;
+      --moss:       #4a5c3a;
+      --dust:       #b8a88a;
+      --gold:       #c9a84c;
+    }
+
+    html, body {
+      background: var(--parchment);
+      /* subtle grain texture */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    }
+
     body { height: 400vh; overflow-x: hidden; }
 
+    /* ── LOADING ── */
     #loading {
-      position: fixed; inset: 0; background: var(--bg);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      z-index: 200; transition: opacity 0.8s ease;
+      position: fixed; inset: 0;
+      background: var(--parchment);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 200; transition: opacity 1s ease;
     }
     #loading.fade { opacity: 0; pointer-events: none; }
-    #loading-label {
-      font-family: 'EB Garamond', serif; font-size: 0.85rem;
-      letter-spacing: 0.25em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 1.5rem;
-    }
-    #loading-track { width: 180px; height: 1px; background: rgba(0,0,0,0.1); }
-    #loading-fill { height: 100%; width: 0%; background: var(--ink); transition: width 0.1s linear; }
 
+    .loading-ornament {
+      font-family: 'Pinyon Script', cursive;
+      font-size: 3.5rem;
+      color: var(--bark);
+      opacity: 0.35;
+      margin-bottom: 2rem;
+      animation: breathe 3s ease-in-out infinite;
+    }
+    @keyframes breathe {
+      0%,100% { opacity: 0.25; transform: scale(0.97); }
+      50%      { opacity: 0.45; transform: scale(1.02); }
+    }
+
+    #loading-track {
+      width: 120px; height: 1px;
+      background: rgba(107,76,42,0.15);
+      position: relative;
+    }
+    #loading-fill {
+      position: absolute; top: 0; left: 0;
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--bark), var(--gold));
+      transition: width 0.15s ease;
+    }
+
+    /* ── LAYOUT ── */
     #scene {
-      position: sticky; top: 0; height: 100vh; width: 100%; overflow: hidden;
+      position: sticky; top: 0;
+      height: 100vh; width: 100%;
+      overflow: hidden;
       display: flex;
     }
 
-    /* Left half: video */
-    #video-side {
-      position: relative;
-      width: 50%; height: 100%;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-    #video-side canvas {
-      max-width: 100%; max-height: 100%;
-      width: auto; height: auto;
-      display: block;
+    /* thin gold divider */
+    #scene::after {
+      content: '';
+      position: absolute;
+      left: 50%; top: 8%; bottom: 8%;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, var(--gold), var(--dust), transparent);
+      opacity: 0.4;
+      z-index: 5;
     }
 
-    /* Right half: texts */
+    /* ── VIDEO SIDE ── */
+    #video-side {
+      width: 50%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      padding: 2rem;
+    }
+
+    /* vignette around video */
+    #video-side::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(28,20,9,0.18) 100%);
+      z-index: 2; pointer-events: none;
+    }
+
+    #canvas {
+      max-width: 100%; max-height: 90vh;
+      width: auto; height: auto;
+      display: block;
+      position: relative; z-index: 1;
+    }
+
+    /* ── TEXT SIDE ── */
     #text-side {
       width: 50%; height: 100%;
       position: relative;
-      flex-shrink: 0;
+    }
+
+    /* decorative corner marks */
+    #text-side::before {
+      content: '✦';
+      position: absolute; top: 1.5rem; right: 1.5rem;
+      font-size: 0.6rem; color: var(--gold); opacity: 0.5;
     }
 
     .txt {
       position: absolute;
-      left: 8%; right: 8%;
-      top: 50%; margin-top: -80px;
+      left: 9%; right: 8%;
+      top: 50%; margin-top: -100px;
       opacity: 0;
       pointer-events: none;
       z-index: 10;
       will-change: transform, opacity;
     }
-    .txt::before {
-      content: '';
-      display: block; width: 28px; height: 1px;
-      background: var(--muted); margin-bottom: 1.1rem; opacity: 0.4;
+
+    .txt .eyebrow {
+      display: flex; align-items: center; gap: 0.7rem;
+      margin-bottom: 1rem;
+    }
+    .txt .eyebrow-line {
+      flex: 0 0 20px; height: 1px;
+      background: var(--gold); opacity: 0.7;
     }
     .txt .label {
-      font-family: 'EB Garamond', serif; font-size: 0.72rem;
-      letter-spacing: 0.28em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 0.6rem; display: block;
+      font-family: 'Libre Baskerville', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--bark);
+      opacity: 0.75;
     }
-    .txt h2 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.6rem, 3vw, 2.8rem);
-      font-weight: 300; font-style: italic;
-      color: var(--ink); line-height: 1.15; margin-bottom: 0.7rem;
-    }
-    .txt p {
-      font-family: 'EB Garamond', serif;
-      font-size: clamp(0.9rem, 1.2vw, 1.1rem);
-      color: var(--muted); line-height: 1.75;
-    }
-    .txt ul {
-      font-family: 'EB Garamond', serif;
-      font-size: clamp(0.9rem, 1.2vw, 1.05rem);
-      color: var(--muted); line-height: 1.9;
-      list-style: none; padding: 0;
-    }
-    .txt ul li::before { content: '— '; opacity: 0.4; }
 
+    .txt h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 3.2vw, 3rem);
+      font-weight: 400;
+      font-style: italic;
+      color: var(--ink);
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+
+    .txt p {
+      font-family: 'Libre Baskerville', serif;
+      font-size: clamp(0.78rem, 1.1vw, 0.92rem);
+      color: var(--bark);
+      line-height: 1.9;
+      opacity: 0.85;
+    }
+
+    .txt ul {
+      font-family: 'Libre Baskerville', serif;
+      font-size: clamp(0.78rem, 1.1vw, 0.9rem);
+      color: var(--bark);
+      line-height: 2.1;
+      list-style: none;
+      opacity: 0.85;
+    }
+    .txt ul li {
+      display: flex; align-items: baseline; gap: 0.6rem;
+    }
+    .txt ul li::before {
+      content: '·';
+      color: var(--gold);
+      font-size: 1.1rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    /* small botanical rule under title */
+    .txt .botanical-rule {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .txt .botanical-rule span {
+      flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--dust), transparent);
+    }
+    .txt .botanical-rule em {
+      font-family: 'Pinyon Script', cursive;
+      font-size: 1.1rem;
+      color: var(--dust);
+      font-style: normal;
+    }
+
+    /* ── CLOSING ── */
     #txt-closing {
-      position: absolute; bottom: 10%; left: 8%; right: 8%;
-      text-align: left; opacity: 0;
-      transition: opacity 0.7s ease, transform 0.7s ease;
-      transform: translateY(40px);
+      position: absolute;
+      top: 50%; margin-top: -80px;
+      left: 9%; right: 8%;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
       pointer-events: none; z-index: 10;
     }
-    #txt-closing.visible { opacity: 1; transform: translateY(0); }
-    #txt-closing::before {
-      content: ''; display: block; width: 28px; height: 1px;
-      background: var(--muted); margin-bottom: 1.1rem; opacity: 0.4;
+    #txt-closing.visible {
+      opacity: 1; transform: translateY(0);
     }
-    #txt-closing h2 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.6rem, 3vw, 2.6rem);
-      font-weight: 300; font-style: italic;
-      color: var(--ink); margin-bottom: 0.7rem;
+    #txt-closing .script {
+      font-family: 'Pinyon Script', cursive;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      color: var(--bark);
+      line-height: 1.1;
+      margin-bottom: 0.6rem;
+      display: block;
     }
     #txt-closing p {
-      font-family: 'EB Garamond', serif; font-size: 1rem;
-      color: var(--muted); letter-spacing: 0.06em; line-height: 1.8;
+      font-family: 'Libre Baskerville', serif;
+      font-size: 0.78rem;
+      color: var(--bark);
+      opacity: 0.7;
+      letter-spacing: 0.12em;
+      line-height: 2;
+    }
+    #txt-closing .closing-rule {
+      width: 40px; height: 1px;
+      background: var(--gold);
+      margin-bottom: 1rem; opacity: 0.6;
     }
 
+    /* ── SCROLL HINT ── */
     #hint {
-      position: absolute; bottom: 2.5rem; left: 50%;
+      position: absolute; bottom: 2.5rem; left: 25%;
       transform: translateX(-50%);
-      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-      opacity: 1; transition: opacity 0.6s ease; z-index: 10;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 0.6rem;
+      opacity: 1; transition: opacity 0.8s ease; z-index: 10;
     }
     #hint.hidden { opacity: 0; }
-    #hint span {
-      font-family: 'EB Garamond', serif; font-size: 0.65rem;
-      letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted);
+    #hint .hint-script {
+      font-family: 'Pinyon Script', cursive;
+      font-size: 1.1rem;
+      color: var(--bark); opacity: 0.45;
     }
     .hint-line {
-      width: 1px; height: 36px;
-      background: linear-gradient(to bottom, var(--muted), transparent);
-      animation: hintPulse 2s ease-in-out infinite;
+      width: 1px; height: 32px;
+      background: linear-gradient(to bottom, var(--bark), transparent);
+      opacity: 0.3;
+      animation: hintDrop 2.2s ease-in-out infinite;
     }
-    @keyframes hintPulse {
-      0%,100% { opacity: 0.3; transform: scaleY(0.7); }
-      50%      { opacity: 1;   transform: scaleY(1); }
+    @keyframes hintDrop {
+      0%,100% { transform: scaleY(0.5) translateY(-4px); opacity: 0.2; }
+      50%      { transform: scaleY(1) translateY(0);     opacity: 0.5; }
     }
 
+    /* ── PROGRESS ── */
     #progress-line {
-      position: fixed; right: 1.8rem; top: 50%; transform: translateY(-50%);
-      display: flex; flex-direction: column; gap: 0.55rem; z-index: 50;
+      position: fixed; right: 1.5rem; top: 50%;
+      transform: translateY(-50%);
+      display: flex; flex-direction: column;
+      gap: 0.6rem; z-index: 50;
     }
     .pdot {
-      width: 4px; height: 4px; border-radius: 50%;
-      background: rgba(26,22,18,0.15); transition: all 0.4s ease;
+      width: 3px; height: 3px; border-radius: 50%;
+      background: rgba(107,76,42,0.2);
+      transition: all 0.5s ease;
     }
-    .pdot.active { background: var(--ink); transform: scale(1.7); }
-
-    /* divider line */
-    #scene::after {
-      content: '';
-      position: absolute; top: 10%; bottom: 10%; left: 50%;
-      width: 1px; background: rgba(26,22,18,0.07);
+    .pdot.active {
+      background: var(--gold);
+      box-shadow: 0 0 6px rgba(201,168,76,0.5);
+      transform: scale(2);
     }
   </style>
 </head>
 <body>
 
+<!-- LOADING -->
 <div id="loading">
-  <p id="loading-label">Carregant experiència</p>
+  <div class="loading-ornament">✦</div>
   <div id="loading-track"><div id="loading-fill"></div></div>
 </div>
 
 <div id="scene">
 
-  <!-- LEFT: video canvas -->
+  <!-- VIDEO LEFT -->
   <div id="video-side">
     <canvas id="canvas"></canvas>
   </div>
 
-  <!-- RIGHT: texts -->
+  <!-- TEXT RIGHT -->
   <div id="text-side">
 
     <div class="txt" id="txt1">
-      <span class="label">Resultat final</span>
+      <div class="eyebrow"><div class="eyebrow-line"></div><span class="label">Resultat final</span></div>
       <h2>El nostre hotel d'insectes</h2>
+      <div class="botanical-rule"><span></span><em>❧</em></div>
       <p>Un refugi natural construït a mà, dissenyat per acollir més de 20 espècies d'insectes beneficiosos.</p>
     </div>
 
     <div class="txt" id="txt2">
-      <span class="label">Materials</span>
+      <div class="eyebrow"><div class="eyebrow-line"></div><span class="label">Materials</span></div>
       <h2>El que hem utilitzat</h2>
+      <div class="botanical-rule"><span></span><em>❧</em></div>
       <ul>
         <li>Fusta</li>
         <li>Destornilladors</li>
@@ -189,33 +317,37 @@
     </div>
 
     <div class="txt" id="txt3">
-      <span class="label">Pas 1 & 2</span>
+      <div class="eyebrow"><div class="eyebrow-line"></div><span class="label">Pas 1 & 2</span></div>
       <h2>L'estructura</h2>
+      <div class="botanical-rule"><span></span><em>❧</em></div>
       <p>Hem unit totes les fustes per donar forma a la caseta amb diferents pisos. Al darrere hi hem col·locat una armella tancada per penjar-la en qualsevol lloc.</p>
     </div>
 
     <div class="txt" id="txt4">
-      <span class="label">Pas 3 · Primera planta</span>
+      <div class="eyebrow"><div class="eyebrow-line"></div><span class="label">Pas 3 · Primera planta</span></div>
       <h2>Tubs de bambú</h2>
+      <div class="botanical-rule"><span></span><em>❧</em></div>
       <p>Hem omplert la primera planta amb tubs de bambú perquè els insectes hi puguin entrar pels forats i fer-hi el seu niu.</p>
     </div>
 
     <div class="txt" id="txt5">
-      <span class="label">Pas 3 · Segona & tercera planta</span>
+      <div class="eyebrow"><div class="eyebrow-line"></div><span class="label">Pas 3 · Segona & tercera planta</span></div>
       <h2>Escorça natural</h2>
+      <div class="botanical-rule"><span></span><em>❧</em></div>
       <p>Les plantes superiors estan plenes d'escorça perquè els insectes s'hi puguin ficar dins dels espais buits que hi ha entre les capes.</p>
     </div>
 
     <div id="txt-closing">
-      <h2>Protegit per una xarxa</h2>
-      <p>Finalment, hi hem posat una xarxa subjectada amb grapes per mantenir-la recta i evitar que caiguin els materials de l'interior.</p>
+      <div class="closing-rule"></div>
+      <span class="script">Protegit per una xarxa</span>
+      <p>Finalment, hi hem posat una xarxa subjectada amb grapes<br>per mantenir-la recta i evitar que caiguin els materials de l'interior.</p>
     </div>
 
-  </div><!-- /text-side -->
+  </div>
 
   <div id="hint">
+    <div class="hint-script">scroll</div>
     <div class="hint-line"></div>
-    <span>Scroll</span>
   </div>
 
   <div id="progress-line">
@@ -241,9 +373,8 @@
   const loading = document.getElementById('loading');
   const fill    = document.getElementById('loading-fill');
   const hint    = document.getElementById('hint');
-
-  const frames = [];
-  let ready = false;
+  const frames  = [];
+  let ready     = false;
 
   const phases = [
     [0.05, 0.12, 0.24, 'txt1', 1],
@@ -259,35 +390,31 @@
     video.muted       = true;
     video.playsInline = true;
     video.preload     = 'auto';
-    
 
     await new Promise((res, rej) => {
-      video.addEventListener("loadedmetadata", res, { once: true });
-      video.addEventListener("error", () => rej("error"), { once: true });
-      setTimeout(() => rej("timeout"), 20000);
+      video.addEventListener('loadedmetadata', res, { once: true });
+      video.addEventListener('error', () => rej('error carregant vídeo'), { once: true });
+      setTimeout(() => rej('timeout'), 20000);
       video.load();
     });
 
-    // Set canvas to native video resolution for quality drawing
     canvas.width  = video.videoWidth;
     canvas.height = video.videoHeight;
 
     for (let i = 0; i < TOTAL_FRAMES; i++) {
       video.currentTime = (i / (TOTAL_FRAMES - 1)) * video.duration;
       await new Promise(res => video.addEventListener('seeked', res, { once: true }));
-
       const off = document.createElement('canvas');
       off.width  = video.videoWidth;
       off.height = video.videoHeight;
       off.getContext('2d').drawImage(video, 0, 0);
       frames.push(off);
-
       fill.style.width = Math.round((i + 1) / TOTAL_FRAMES * 100) + '%';
     }
 
     ctx.drawImage(frames[0], 0, 0);
     loading.classList.add('fade');
-    setTimeout(() => loading.style.display = 'none', 900);
+    setTimeout(() => loading.style.display = 'none', 1000);
     ready = true;
     onScroll();
   }
@@ -296,41 +423,34 @@
 
   function onScroll() {
     if (!ready) return;
-
     const scrollTop = window.scrollY;
     const maxScroll  = document.body.scrollHeight - window.innerHeight;
     const progress   = Math.max(0, Math.min(1, scrollTop / maxScroll));
 
     const idx = Math.min(TOTAL_FRAMES - 1, Math.round(progress * (TOTAL_FRAMES - 1)));
-    if (idx !== lastFrame) {
-      ctx.drawImage(frames[idx], 0, 0);
-      lastFrame = idx;
-    }
+    if (idx !== lastFrame) { ctx.drawImage(frames[idx], 0, 0); lastFrame = idx; }
 
     if (scrollTop > 80) hint.classList.add('hidden');
     else hint.classList.remove('hidden');
 
     document.getElementById('pd0').classList.toggle('active', progress < 0.05);
 
-    phases.forEach(([start, peak, end, id, dotIdx]) => {
+    phases.forEach(([start, , end, id, dotIdx]) => {
       const el = document.getElementById(id);
       if (!el) return;
-
       if (progress < start || progress > end) {
         el.style.opacity   = '0';
-        el.style.transform = `translateY(${progress < start ? 40 : -40}px)`;
+        el.style.transform = `translateY(${progress < start ? 36 : -36}px)`;
       } else {
-        const t       = (progress - start) / (end - start);
-        const y       = 40 - t * 80;
-        const opacity = t < 0.15 ? t / 0.15 : t > 0.85 ? (1 - t) / 0.15 : 1;
-        el.style.opacity   = opacity;
+        const t = (progress - start) / (end - start);
+        const y = 36 - t * 72;
+        const o = t < 0.15 ? t / 0.15 : t > 0.85 ? (1 - t) / 0.15 : 1;
+        el.style.opacity   = o;
         el.style.transform = `translateY(${y}px)`;
       }
-
       if (progress >= start && progress < end) {
-        for (let d = 0; d <= 5; d++) {
+        for (let d = 0; d <= 5; d++)
           document.getElementById('pd' + d)?.classList.toggle('active', d === dotIdx);
-        }
       }
     });
 
@@ -338,7 +458,10 @@
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
-  extractFrames().catch(e => { document.getElementById("loading-label").textContent = "Error: " + e; });
+  extractFrames().catch(e => {
+    document.getElementById('loading-fill').style.background = '#c0392b';
+    document.querySelector('.loading-ornament').textContent = e;
+  });
 </script>
 </body>
 </html>
