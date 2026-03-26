@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="ca">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Hotel de Insectos</title>
+  <title>Hotel d'Insectes</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
   <style>
@@ -67,27 +67,28 @@
 
     canvas {
       position: absolute;
-      inset: 0;
-      width: 100%;
+      top: 0;
+      left: 0;
+      width: 50%;
       height: 100%;
       object-fit: contain;
+      object-position: center;
       z-index: 1;
     }
 
     /* ── TEXT BLOCKS ── */
     .txt {
       position: absolute;
-      max-width: 320px;
+      max-width: 300px;
       opacity: 0;
-      /* starts below, moves up as it appears, then continues up as scroll goes */
       transition: opacity 0.6s ease;
       pointer-events: none;
       z-index: 10;
       will-change: transform, opacity;
     }
 
-    .txt-left  { left: 4%; }
-    .txt-right { right: 4%; text-align: right; }
+    .txt-left  { left: 54%; }
+    .txt-right { left: 54%; right: auto; text-align: left; }
 
     .txt .label {
       font-family: 'EB Garamond', serif;
@@ -101,7 +102,7 @@
 
     .txt h2 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-size: clamp(1.6rem, 3.5vw, 2.8rem);
       font-weight: 300;
       font-style: italic;
       color: var(--ink);
@@ -111,12 +112,26 @@
 
     .txt p {
       font-family: 'EB Garamond', serif;
-      font-size: clamp(1rem, 1.5vw, 1.2rem);
+      font-size: clamp(0.9rem, 1.3vw, 1.1rem);
       color: var(--muted);
       line-height: 1.75;
     }
 
-    .txt-left::before {
+    .txt ul {
+      font-family: 'EB Garamond', serif;
+      font-size: clamp(0.9rem, 1.3vw, 1.05rem);
+      color: var(--muted);
+      line-height: 1.9;
+      list-style: none;
+      padding: 0;
+    }
+
+    .txt ul li::before {
+      content: '— ';
+      opacity: 0.4;
+    }
+
+    .txt-left::before, .txt-right::before {
       content: '';
       display: block;
       width: 28px;
@@ -125,21 +140,12 @@
       margin-bottom: 1.1rem;
       opacity: 0.4;
     }
-    .txt-right::after {
-      content: '';
-      display: block;
-      width: 28px;
-      height: 1px;
-      background: var(--muted);
-      margin-top: 1.1rem;
-      opacity: 0.4;
-      margin-left: auto;
-    }
+    .txt-right::after { display: none; }
 
     /* ── CLOSING ── */
     #txt-closing {
       position: absolute;
-      bottom: 12%;
+      bottom: 10%;
       left: 50%;
       transform: translateX(-50%) translateY(40px);
       text-align: center;
@@ -148,7 +154,7 @@
       pointer-events: none;
       z-index: 10;
       width: 90%;
-      max-width: 560px;
+      max-width: 600px;
     }
     #txt-closing.visible {
       opacity: 1;
@@ -156,17 +162,18 @@
     }
     #txt-closing h2 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2rem, 4vw, 3rem);
+      font-size: clamp(1.8rem, 4vw, 3rem);
       font-weight: 300;
       font-style: italic;
       color: var(--ink);
-      margin-bottom: 0.7rem;
+      margin-bottom: 0.8rem;
     }
     #txt-closing p {
       font-family: 'EB Garamond', serif;
       font-size: 1rem;
       color: var(--muted);
       letter-spacing: 0.1em;
+      line-height: 1.8;
     }
 
     /* ── SCROLL HINT ── */
@@ -229,7 +236,7 @@
 
 <!-- LOADING -->
 <div id="loading">
-  <p id="loading-label">Cargando experiencia</p>
+  <p id="loading-label"> </p>
   <div id="loading-track"><div id="loading-fill"></div></div>
 </div>
 
@@ -237,40 +244,53 @@
 <div id="scene">
   <canvas id="canvas"></canvas>
 
-  <!-- TEXT BLOCKS — vertical position set via JS based on scroll -->
+  <!-- TEXT 1: Introducció -->
   <div class="txt txt-right" id="txt1">
-    <span class="label">Estructura</span>
-    <h2>Madera envejecida</h2>
-    <p>Marco principal de pino tratado. Refugio permanente para más de 20 especies de insectos beneficiosos.</p>
+    <span class="label">Resultat final</span>
+    <h2>El nostre hotel d'insectes</h2>
+    <p>Un refugi natural construït a mà, dissenyat per acollir més de 20 espècies d'insectes beneficiosos.</p>
   </div>
 
+  <!-- TEXT 2: Materials -->
   <div class="txt txt-left" id="txt2">
-    <span class="label">Cubierta</span>
-    <h2>Tejado inclinado</h2>
-    <p>Protege el interior de la lluvia y el viento. El ángulo de 30° evacua el agua sin encharcar los compartimentos.</p>
+    <span class="label">Materials</span>
+    <h2>El que hem utilitzat</h2>
+    <ul>
+      <li>Fusta</li>
+      <li>Destornilladors</li>
+      <li>Cargols</li>
+      <li>Tubs de bambú</li>
+      <li>Escorça</li>
+      <li>Una xarxa</li>
+      <li>Grapadora amb grapes</li>
+    </ul>
   </div>
 
+  <!-- TEXT 3: Estructura -->
   <div class="txt txt-right" id="txt3">
-    <span class="label">Nidificación</span>
-    <h2>Tubos de bambú</h2>
-    <p>Nidos naturales para la abeja solitaria <em>Osmia bicornis</em>. Cada tubo puede albergar hasta 8 larvas.</p>
+    <span class="label">Pas 1 & 2</span>
+    <h2>L'estructura</h2>
+    <p>Hem unit totes les fustes per donar forma a la caseta amb diferents pisos. Al darrere hi hem col·locat una armella tancada per penjar-la en qualsevol lloc.</p>
   </div>
 
+  <!-- TEXT 4: Primera planta -->
   <div class="txt txt-left" id="txt4">
-    <span class="label">Refugio de invierno</span>
-    <h2>Piñas & corteza</h2>
-    <p>Las grietas entre piñas y corteza son el hogar de invierno de crisopas, escarabajos y arañas depredadoras.</p>
+    <span class="label">Pas 3 · Primera planta</span>
+    <h2>Tubs de bambú</h2>
+    <p>Hem omplert la primera planta amb tubs de bambú perquè els insectes hi puguin entrar pels forats i fer-hi el seu niu.</p>
   </div>
 
+  <!-- TEXT 5: Segona i tercera planta -->
   <div class="txt txt-right" id="txt5">
-    <span class="label">Hábitat húmedo</span>
-    <h2>Musgo & troncos</h2>
-    <p>El musgo retiene humedad. Los troncos taladrados acogen larvas de escarabajo y abejorros en diapausa.</p>
+    <span class="label">Pas 3 · Segona & tercera planta</span>
+    <h2>Escorça natural</h2>
+    <p>Les plantes superiors estan plenes d'escorça perquè els insectes s'hi puguin ficar dins dels espais buits que hi ha entre les capes.</p>
   </div>
 
+  <!-- CLOSING -->
   <div id="txt-closing">
-    <h2>Un ecosistema en miniatura</h2>
-    <p>Instálalo a 1.5 m de altura · orientado al sur · cerca de flores silvestres</p>
+    <h2>Protegit per una xarxa</h2>
+    <p>Finalment, hi hem posat una xarxa subjectada amb grapes<br>per mantenir-la recta i evitar que caiguin els materials de l'interior.</p>
   </div>
 
   <div id="hint">
@@ -289,12 +309,11 @@
 </div>
 
 <script>
-  // Scroll to top immediately on load
   history.scrollRestoration = 'manual';
   window.scrollTo(0, 0);
 
   const TOTAL_FRAMES = 30;
-  const VIDEO_SRC    = 'hotel.mp4'; // 5.92s, 768x1376
+  const VIDEO_SRC    = 'hotel.mp4';
 
   const canvas  = document.getElementById('canvas');
   const ctx     = canvas.getContext('2d');
@@ -305,19 +324,15 @@
   const frames = [];
   let ready    = false;
 
-  // phases: [startPct, peakPct, endPct, elementId, dotIdx]
-  // text rises from bottom as scroll progresses through its window
   const phases = [
-    [0.08, 0.15, 0.28, 'txt1', 1],
-    [0.24, 0.31, 0.44, 'txt2', 2],
-    [0.40, 0.47, 0.60, 'txt3', 3],
-    [0.56, 0.63, 0.76, 'txt4', 4],
-    [0.72, 0.79, 0.90, 'txt5', 5],
+    [0.05, 0.12, 0.24, 'txt1', 1],
+    [0.20, 0.28, 0.40, 'txt2', 2],
+    [0.37, 0.45, 0.57, 'txt3', 3],
+    [0.54, 0.62, 0.74, 'txt4', 4],
+    [0.71, 0.79, 0.88, 'txt5', 5],
   ];
 
-  // Position each text block vertically centered
-  const txts = document.querySelectorAll('.txt');
-  txts.forEach(el => {
+  document.querySelectorAll('.txt').forEach(el => {
     el.style.top = '50%';
     el.style.marginTop = '-80px';
   });
@@ -336,6 +351,8 @@
 
     canvas.width  = video.videoWidth;
     canvas.height = video.videoHeight;
+    canvas.style.width  = '50%';
+    canvas.style.height = '100%';
 
     for (let i = 0; i < TOTAL_FRAMES; i++) {
       video.currentTime = (i / (TOTAL_FRAMES - 1)) * video.duration;
@@ -351,10 +368,8 @@
     }
 
     ctx.drawImage(frames[0], 0, 0);
-
     loading.classList.add('fade');
     setTimeout(() => loading.style.display = 'none', 900);
-
     ready = true;
     onScroll();
   }
@@ -368,40 +383,32 @@
     const maxScroll  = document.body.scrollHeight - window.innerHeight;
     const progress   = Math.max(0, Math.min(1, scrollTop / maxScroll));
 
-    // Canvas
     const idx = Math.min(TOTAL_FRAMES - 1, Math.round(progress * (TOTAL_FRAMES - 1)));
     if (idx !== lastFrame) {
       ctx.drawImage(frames[idx], 0, 0);
       lastFrame = idx;
     }
 
-    // Hint
     if (scrollTop > 80) hint.classList.add('hidden');
     else hint.classList.remove('hidden');
 
-    // Dot 0
-    document.getElementById('pd0').classList.toggle('active', progress < 0.08);
+    document.getElementById('pd0').classList.toggle('active', progress < 0.05);
 
-    // Animate each text block — rises upward as scroll progresses
     phases.forEach(([start, peak, end, id, dotIdx]) => {
       const el = document.getElementById(id);
       if (!el) return;
 
       if (progress < start || progress > end) {
-        el.style.opacity = '0';
+        el.style.opacity   = '0';
         el.style.transform = `translateY(${progress < start ? 40 : -40}px)`;
       } else {
-        // map progress within [start, end] to a vertical travel
-        const t = (progress - start) / (end - start); // 0 → 1
-        // rises from +40px to -40px across its window
-        const y = 40 - t * 80;
-        // opacity: fade in at start, fade out near end
+        const t       = (progress - start) / (end - start);
+        const y       = 40 - t * 80;
         const opacity = t < 0.15 ? t / 0.15 : t > 0.85 ? (1 - t) / 0.15 : 1;
         el.style.opacity   = opacity;
         el.style.transform = `translateY(${y}px)`;
       }
 
-      // Dot
       if (progress >= start && progress < end) {
         for (let d = 0; d <= 5; d++) {
           document.getElementById('pd' + d)?.classList.toggle('active', d === dotIdx);
@@ -409,9 +416,7 @@
       }
     });
 
-    // Closing text
-    const closing = document.getElementById('txt-closing');
-    closing.classList.toggle('visible', progress >= 0.88);
+    document.getElementById('txt-closing').classList.toggle('visible', progress >= 0.88);
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
