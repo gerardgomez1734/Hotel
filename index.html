@@ -1,1 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hotel de Insectos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+    :root {
+      --ink: #1a1612;
+      --muted: #8a7f74;
+      --bg: #faf9f7;
+    }
+
+    html, body { background: var(--bg); }
+
+    body {
+      height: 400vh;
+      overflow-x: hidden;
+    }
+
+    /* ── LOADING ── */
+    #loading {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      transition: opacity 0.8s ease;
+    }
+    #loading.fade { opacity: 0; pointer-events: none; }
+
+    #loading-label {
+      font-family: 'EB Garamond', serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+    #loading-track {
+      width: 180px;
+      height: 1px;
+      background: rgba(0,0,0,0.1);
+    }
+    #loading-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--ink);
+      transition: width 0.1s linear;
+    }
+
+    /* ── STICKY SCENE ── */
+    #scene {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      z-index: 1;
+    }
+
+    /* ── TEXT BLOCKS ── */
+    .txt {
+      position: absolute;
+      max-width: 320px;
+      opacity: 0;
+      /* starts below, moves up as it appears, then continues up as scroll goes */
+      transition: opacity 0.6s ease;
+      pointer-events: none;
+      z-index: 10;
+      will-change: transform, opacity;
+    }
+
+    .txt-left  { left: 4%; }
+    .txt-right { right: 4%; text-align: right; }
+
+    .txt .label {
+      font-family: 'EB Garamond', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+      display: block;
+    }
+
+    .txt h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--ink);
+      line-height: 1.15;
+      margin-bottom: 0.7rem;
+    }
+
+    .txt p {
+      font-family: 'EB Garamond', serif;
+      font-size: clamp(1rem, 1.5vw, 1.2rem);
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .txt-left::before {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 1px;
+      background: var(--muted);
+      margin-bottom: 1.1rem;
+      opacity: 0.4;
+    }
+    .txt-right::after {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 1px;
+      background: var(--muted);
+      margin-top: 1.1rem;
+      opacity: 0.4;
+      margin-left: auto;
+    }
+
+    /* ── CLOSING ── */
+    #txt-closing {
+      position: absolute;
+      bottom: 12%;
+      left: 50%;
+      transform: translateX(-50%) translateY(40px);
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.7s ease, transform 0.7s ease;
+      pointer-events: none;
+      z-index: 10;
+      width: 90%;
+      max-width: 560px;
+    }
+    #txt-closing.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    #txt-closing h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--ink);
+      margin-bottom: 0.7rem;
+    }
+    #txt-closing p {
+      font-family: 'EB Garamond', serif;
+      font-size: 1rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── SCROLL HINT ── */
+    #hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 1;
+      transition: opacity 0.6s ease;
+      z-index: 10;
+    }
+    #hint.hidden { opacity: 0; }
+    #hint span {
+      font-family: 'EB Garamond', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .hint-line {
+      width: 1px;
+      height: 36px;
+      background: linear-gradient(to bottom, var(--muted), transparent);
+      animation: hintPulse 2s ease-in-out infinite;
+    }
+    @keyframes hintPulse {
+      0%,100% { opacity: 0.3; transform: scaleY(0.7); }
+      50%      { opacity: 1;   transform: scaleY(1); }
+    }
+
+    /* ── PROGRESS DOTS ── */
+    #progress-line {
+      position: fixed;
+      right: 1.8rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      z-index: 50;
+    }
+    .pdot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: rgba(26,22,18,0.15);
+      transition: all 0.4s ease;
+    }
+    .pdot.active {
+      background: var(--ink);
+      transform: scale(1.7);
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <p id="loading-label">Cargando experiencia</p>
+  <div id="loading-track"><div id="loading-fill"></div></div>
+</div>
+
+<!-- STICKY SCENE -->
+<div id="scene">
+  <canvas id="canvas"></canvas>
+
+  <!-- TEXT BLOCKS — vertical position set via JS based on scroll -->
+  <div class="txt txt-right" id="txt1">
+    <span class="label">Estructura</span>
+    <h2>Madera envejecida</h2>
+    <p>Marco principal de pino tratado. Refugio permanente para más de 20 especies de insectos beneficiosos.</p>
+  </div>
+
+  <div class="txt txt-left" id="txt2">
+    <span class="label">Cubierta</span>
+    <h2>Tejado inclinado</h2>
+    <p>Protege el interior de la lluvia y el viento. El ángulo de 30° evacua el agua sin encharcar los compartimentos.</p>
+  </div>
+
+  <div class="txt txt-right" id="txt3">
+    <span class="label">Nidificación</span>
+    <h2>Tubos de bambú</h2>
+    <p>Nidos naturales para la abeja solitaria <em>Osmia bicornis</em>. Cada tubo puede albergar hasta 8 larvas.</p>
+  </div>
+
+  <div class="txt txt-left" id="txt4">
+    <span class="label">Refugio de invierno</span>
+    <h2>Piñas & corteza</h2>
+    <p>Las grietas entre piñas y corteza son el hogar de invierno de crisopas, escarabajos y arañas depredadoras.</p>
+  </div>
+
+  <div class="txt txt-right" id="txt5">
+    <span class="label">Hábitat húmedo</span>
+    <h2>Musgo & troncos</h2>
+    <p>El musgo retiene humedad. Los troncos taladrados acogen larvas de escarabajo y abejorros en diapausa.</p>
+  </div>
+
+  <div id="txt-closing">
+    <h2>Un ecosistema en miniatura</h2>
+    <p>Instálalo a 1.5 m de altura · orientado al sur · cerca de flores silvestres</p>
+  </div>
+
+  <div id="hint">
+    <div class="hint-line"></div>
+    <span>Scroll</span>
+  </div>
+
+  <div id="progress-line">
+    <div class="pdot active" id="pd0"></div>
+    <div class="pdot" id="pd1"></div>
+    <div class="pdot" id="pd2"></div>
+    <div class="pdot" id="pd3"></div>
+    <div class="pdot" id="pd4"></div>
+    <div class="pdot" id="pd5"></div>
+  </div>
+</div>
+
+<script>
+  // Scroll to top immediately on load
+  history.scrollRestoration = 'manual';
+  window.scrollTo(0, 0);
+
+  const TOTAL_FRAMES = 30;
+  const VIDEO_SRC    = 'hotel.mp4'; // 5.92s, 768x1376
+
+  const canvas  = document.getElementById('canvas');
+  const ctx     = canvas.getContext('2d');
+  const loading = document.getElementById('loading');
+  const fill    = document.getElementById('loading-fill');
+  const hint    = document.getElementById('hint');
+
+  const frames = [];
+  let ready    = false;
+
+  // phases: [startPct, peakPct, endPct, elementId, dotIdx]
+  // text rises from bottom as scroll progresses through its window
+  const phases = [
+    [0.08, 0.15, 0.28, 'txt1', 1],
+    [0.24, 0.31, 0.44, 'txt2', 2],
+    [0.40, 0.47, 0.60, 'txt3', 3],
+    [0.56, 0.63, 0.76, 'txt4', 4],
+    [0.72, 0.79, 0.90, 'txt5', 5],
+  ];
+
+  // Position each text block vertically centered
+  const txts = document.querySelectorAll('.txt');
+  txts.forEach(el => {
+    el.style.top = '50%';
+    el.style.marginTop = '-80px';
+  });
+
+  async function extractFrames() {
+    const video = document.createElement('video');
+    video.src         = VIDEO_SRC;
+    video.muted       = true;
+    video.playsInline = true;
+    video.crossOrigin = 'anonymous';
+
+    await new Promise(res => {
+      video.addEventListener('loadedmetadata', res, { once: true });
+      video.load();
+    });
+
+    canvas.width  = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    for (let i = 0; i < TOTAL_FRAMES; i++) {
+      video.currentTime = (i / (TOTAL_FRAMES - 1)) * video.duration;
+      await new Promise(res => video.addEventListener('seeked', res, { once: true }));
+
+      const off = document.createElement('canvas');
+      off.width  = video.videoWidth;
+      off.height = video.videoHeight;
+      off.getContext('2d').drawImage(video, 0, 0);
+      frames.push(off);
+
+      fill.style.width = Math.round((i + 1) / TOTAL_FRAMES * 100) + '%';
+    }
+
+    ctx.drawImage(frames[0], 0, 0);
+
+    loading.classList.add('fade');
+    setTimeout(() => loading.style.display = 'none', 900);
+
+    ready = true;
+    onScroll();
+  }
+
+  let lastFrame = -1;
+
+  function onScroll() {
+    if (!ready) return;
+
+    const scrollTop = window.scrollY;
+    const maxScroll  = document.body.scrollHeight - window.innerHeight;
+    const progress   = Math.max(0, Math.min(1, scrollTop / maxScroll));
+
+    // Canvas
+    const idx = Math.min(TOTAL_FRAMES - 1, Math.round(progress * (TOTAL_FRAMES - 1)));
+    if (idx !== lastFrame) {
+      ctx.drawImage(frames[idx], 0, 0);
+      lastFrame = idx;
+    }
+
+    // Hint
+    if (scrollTop > 80) hint.classList.add('hidden');
+    else hint.classList.remove('hidden');
+
+    // Dot 0
+    document.getElementById('pd0').classList.toggle('active', progress < 0.08);
+
+    // Animate each text block — rises upward as scroll progresses
+    phases.forEach(([start, peak, end, id, dotIdx]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+
+      if (progress < start || progress > end) {
+        el.style.opacity = '0';
+        el.style.transform = `translateY(${progress < start ? 40 : -40}px)`;
+      } else {
+        // map progress within [start, end] to a vertical travel
+        const t = (progress - start) / (end - start); // 0 → 1
+        // rises from +40px to -40px across its window
+        const y = 40 - t * 80;
+        // opacity: fade in at start, fade out near end
+        const opacity = t < 0.15 ? t / 0.15 : t > 0.85 ? (1 - t) / 0.15 : 1;
+        el.style.opacity   = opacity;
+        el.style.transform = `translateY(${y}px)`;
+      }
+
+      // Dot
+      if (progress >= start && progress < end) {
+        for (let d = 0; d <= 5; d++) {
+          document.getElementById('pd' + d)?.classList.toggle('active', d === dotIdx);
+        }
+      }
+    });
+
+    // Closing text
+    const closing = document.getElementById('txt-closing');
+    closing.classList.toggle('visible', progress >= 0.88);
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  extractFrames();
+</script>
+</body>
+</html>
