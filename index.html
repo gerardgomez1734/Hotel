@@ -8,199 +8,123 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-    :root {
-      --ink: #1a1612;
-      --muted: #8a7f74;
-      --bg: #faf9f7;
-    }
-
+    :root { --ink: #1a1612; --muted: #8a7f74; --bg: #faf9f7; }
     html, body { background: var(--bg); }
+    body { height: 400vh; overflow-x: hidden; }
 
-    body {
-      height: 400vh;
-      overflow-x: hidden;
-    }
-
-    /* ── LOADING ── */
     #loading {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 200;
-      transition: opacity 0.8s ease;
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 200; transition: opacity 0.8s ease;
     }
     #loading.fade { opacity: 0; pointer-events: none; }
-
     #loading-label {
-      font-family: 'EB Garamond', serif;
-      font-size: 0.85rem;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 1.5rem;
+      font-family: 'EB Garamond', serif; font-size: 0.85rem;
+      letter-spacing: 0.25em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 1.5rem;
     }
-    #loading-track {
-      width: 180px;
-      height: 1px;
-      background: rgba(0,0,0,0.1);
-    }
-    #loading-fill {
-      height: 100%;
-      width: 0%;
-      background: var(--ink);
-      transition: width 0.1s linear;
-    }
+    #loading-track { width: 180px; height: 1px; background: rgba(0,0,0,0.1); }
+    #loading-fill { height: 100%; width: 0%; background: var(--ink); transition: width 0.1s linear; }
 
-    /* ── STICKY SCENE ── */
     #scene {
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      width: 100%;
-      overflow: hidden;
+      position: sticky; top: 0; height: 100vh; width: 100%; overflow: hidden;
+      display: flex;
     }
 
-    canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 50%;
-      height: 100%;
-      object-fit: contain;
-      object-position: center;
-      z-index: 1;
+    /* Left half: video */
+    #video-side {
+      position: relative;
+      width: 50%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    #video-side canvas {
+      max-width: 100%; max-height: 100%;
+      width: auto; height: auto;
+      display: block;
     }
 
-    /* ── TEXT BLOCKS ── */
+    /* Right half: texts */
+    #text-side {
+      width: 50%; height: 100%;
+      position: relative;
+      flex-shrink: 0;
+    }
+
     .txt {
       position: absolute;
-      max-width: 300px;
+      left: 8%; right: 8%;
+      top: 50%; margin-top: -80px;
       opacity: 0;
-      transition: opacity 0.6s ease;
       pointer-events: none;
       z-index: 10;
       will-change: transform, opacity;
     }
-
-    .txt-left  { left: 54%; }
-    .txt-right { left: 54%; right: auto; text-align: left; }
-
-    .txt .label {
-      font-family: 'EB Garamond', serif;
-      font-size: 0.72rem;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.6rem;
-      display: block;
+    .txt::before {
+      content: '';
+      display: block; width: 28px; height: 1px;
+      background: var(--muted); margin-bottom: 1.1rem; opacity: 0.4;
     }
-
+    .txt .label {
+      font-family: 'EB Garamond', serif; font-size: 0.72rem;
+      letter-spacing: 0.28em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 0.6rem; display: block;
+    }
     .txt h2 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.6rem, 3.5vw, 2.8rem);
-      font-weight: 300;
-      font-style: italic;
-      color: var(--ink);
-      line-height: 1.15;
-      margin-bottom: 0.7rem;
+      font-size: clamp(1.6rem, 3vw, 2.8rem);
+      font-weight: 300; font-style: italic;
+      color: var(--ink); line-height: 1.15; margin-bottom: 0.7rem;
     }
-
     .txt p {
       font-family: 'EB Garamond', serif;
-      font-size: clamp(0.9rem, 1.3vw, 1.1rem);
-      color: var(--muted);
-      line-height: 1.75;
+      font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+      color: var(--muted); line-height: 1.75;
     }
-
     .txt ul {
       font-family: 'EB Garamond', serif;
-      font-size: clamp(0.9rem, 1.3vw, 1.05rem);
-      color: var(--muted);
-      line-height: 1.9;
-      list-style: none;
-      padding: 0;
+      font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+      color: var(--muted); line-height: 1.9;
+      list-style: none; padding: 0;
     }
+    .txt ul li::before { content: '— '; opacity: 0.4; }
 
-    .txt ul li::before {
-      content: '— ';
-      opacity: 0.4;
-    }
-
-    .txt-left::before, .txt-right::before {
-      content: '';
-      display: block;
-      width: 28px;
-      height: 1px;
-      background: var(--muted);
-      margin-bottom: 1.1rem;
-      opacity: 0.4;
-    }
-    .txt-right::after { display: none; }
-
-    /* ── CLOSING ── */
     #txt-closing {
-      position: absolute;
-      bottom: 10%;
-      left: 50%;
-      transform: translateX(-50%) translateY(40px);
-      text-align: center;
-      opacity: 0;
+      position: absolute; bottom: 10%; left: 8%; right: 8%;
+      text-align: left; opacity: 0;
       transition: opacity 0.7s ease, transform 0.7s ease;
-      pointer-events: none;
-      z-index: 10;
-      width: 90%;
-      max-width: 600px;
+      transform: translateY(40px);
+      pointer-events: none; z-index: 10;
     }
-    #txt-closing.visible {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
+    #txt-closing.visible { opacity: 1; transform: translateY(0); }
+    #txt-closing::before {
+      content: ''; display: block; width: 28px; height: 1px;
+      background: var(--muted); margin-bottom: 1.1rem; opacity: 0.4;
     }
     #txt-closing h2 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.8rem, 4vw, 3rem);
-      font-weight: 300;
-      font-style: italic;
-      color: var(--ink);
-      margin-bottom: 0.8rem;
+      font-size: clamp(1.6rem, 3vw, 2.6rem);
+      font-weight: 300; font-style: italic;
+      color: var(--ink); margin-bottom: 0.7rem;
     }
     #txt-closing p {
-      font-family: 'EB Garamond', serif;
-      font-size: 1rem;
-      color: var(--muted);
-      letter-spacing: 0.1em;
-      line-height: 1.8;
+      font-family: 'EB Garamond', serif; font-size: 1rem;
+      color: var(--muted); letter-spacing: 0.06em; line-height: 1.8;
     }
 
-    /* ── SCROLL HINT ── */
     #hint {
-      position: absolute;
-      bottom: 2.5rem;
-      left: 50%;
+      position: absolute; bottom: 2.5rem; left: 50%;
       transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-      opacity: 1;
-      transition: opacity 0.6s ease;
-      z-index: 10;
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      opacity: 1; transition: opacity 0.6s ease; z-index: 10;
     }
     #hint.hidden { opacity: 0; }
     #hint span {
-      font-family: 'EB Garamond', serif;
-      font-size: 0.65rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--muted);
+      font-family: 'EB Garamond', serif; font-size: 0.65rem;
+      letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted);
     }
     .hint-line {
-      width: 1px;
-      height: 36px;
+      width: 1px; height: 36px;
       background: linear-gradient(to bottom, var(--muted), transparent);
       animation: hintPulse 2s ease-in-out infinite;
     }
@@ -209,89 +133,85 @@
       50%      { opacity: 1;   transform: scaleY(1); }
     }
 
-    /* ── PROGRESS DOTS ── */
     #progress-line {
-      position: fixed;
-      right: 1.8rem;
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      flex-direction: column;
-      gap: 0.55rem;
-      z-index: 50;
+      position: fixed; right: 1.8rem; top: 50%; transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 0.55rem; z-index: 50;
     }
     .pdot {
-      width: 4px; height: 4px;
-      border-radius: 50%;
-      background: rgba(26,22,18,0.15);
-      transition: all 0.4s ease;
+      width: 4px; height: 4px; border-radius: 50%;
+      background: rgba(26,22,18,0.15); transition: all 0.4s ease;
     }
-    .pdot.active {
-      background: var(--ink);
-      transform: scale(1.7);
+    .pdot.active { background: var(--ink); transform: scale(1.7); }
+
+    /* divider line */
+    #scene::after {
+      content: '';
+      position: absolute; top: 10%; bottom: 10%; left: 50%;
+      width: 1px; background: rgba(26,22,18,0.07);
     }
   </style>
 </head>
 <body>
 
-<!-- LOADING -->
 <div id="loading">
-  <p id="loading-label"> </p>
+  <p id="loading-label">Carregant experiència</p>
   <div id="loading-track"><div id="loading-fill"></div></div>
 </div>
 
-<!-- STICKY SCENE -->
 <div id="scene">
-  <canvas id="canvas"></canvas>
 
-  <!-- TEXT 1: Introducció -->
-  <div class="txt txt-right" id="txt1">
-    <span class="label">Resultat final</span>
-    <h2>El nostre hotel d'insectes</h2>
-    <p>Un refugi natural construït a mà, dissenyat per acollir més de 20 espècies d'insectes beneficiosos.</p>
+  <!-- LEFT: video canvas -->
+  <div id="video-side">
+    <canvas id="canvas"></canvas>
   </div>
 
-  <!-- TEXT 2: Materials -->
-  <div class="txt txt-left" id="txt2">
-    <span class="label">Materials</span>
-    <h2>El que hem utilitzat</h2>
-    <ul>
-      <li>Fusta</li>
-      <li>Destornilladors</li>
-      <li>Cargols</li>
-      <li>Tubs de bambú</li>
-      <li>Escorça</li>
-      <li>Una xarxa</li>
-      <li>Grapadora amb grapes</li>
-    </ul>
-  </div>
+  <!-- RIGHT: texts -->
+  <div id="text-side">
 
-  <!-- TEXT 3: Estructura -->
-  <div class="txt txt-right" id="txt3">
-    <span class="label">Pas 1 & 2</span>
-    <h2>L'estructura</h2>
-    <p>Hem unit totes les fustes per donar forma a la caseta amb diferents pisos. Al darrere hi hem col·locat una armella tancada per penjar-la en qualsevol lloc.</p>
-  </div>
+    <div class="txt" id="txt1">
+      <span class="label">Resultat final</span>
+      <h2>El nostre hotel d'insectes</h2>
+      <p>Un refugi natural construït a mà, dissenyat per acollir més de 20 espècies d'insectes beneficiosos.</p>
+    </div>
 
-  <!-- TEXT 4: Primera planta -->
-  <div class="txt txt-left" id="txt4">
-    <span class="label">Pas 3 · Primera planta</span>
-    <h2>Tubs de bambú</h2>
-    <p>Hem omplert la primera planta amb tubs de bambú perquè els insectes hi puguin entrar pels forats i fer-hi el seu niu.</p>
-  </div>
+    <div class="txt" id="txt2">
+      <span class="label">Materials</span>
+      <h2>El que hem utilitzat</h2>
+      <ul>
+        <li>Fusta</li>
+        <li>Destornilladors</li>
+        <li>Cargols</li>
+        <li>Tubs de bambú</li>
+        <li>Escorça</li>
+        <li>Una xarxa</li>
+        <li>Grapadora amb grapes</li>
+      </ul>
+    </div>
 
-  <!-- TEXT 5: Segona i tercera planta -->
-  <div class="txt txt-right" id="txt5">
-    <span class="label">Pas 3 · Segona & tercera planta</span>
-    <h2>Escorça natural</h2>
-    <p>Les plantes superiors estan plenes d'escorça perquè els insectes s'hi puguin ficar dins dels espais buits que hi ha entre les capes.</p>
-  </div>
+    <div class="txt" id="txt3">
+      <span class="label">Pas 1 & 2</span>
+      <h2>L'estructura</h2>
+      <p>Hem unit totes les fustes per donar forma a la caseta amb diferents pisos. Al darrere hi hem col·locat una armella tancada per penjar-la en qualsevol lloc.</p>
+    </div>
 
-  <!-- CLOSING -->
-  <div id="txt-closing">
-    <h2>Protegit per una xarxa</h2>
-    <p>Finalment, hi hem posat una xarxa subjectada amb grapes<br>per mantenir-la recta i evitar que caiguin els materials de l'interior.</p>
-  </div>
+    <div class="txt" id="txt4">
+      <span class="label">Pas 3 · Primera planta</span>
+      <h2>Tubs de bambú</h2>
+      <p>Hem omplert la primera planta amb tubs de bambú perquè els insectes hi puguin entrar pels forats i fer-hi el seu niu.</p>
+    </div>
+
+    <div class="txt" id="txt5">
+      <span class="label">Pas 3 · Segona & tercera planta</span>
+      <h2>Escorça natural</h2>
+      <p>Les plantes superiors estan plenes d'escorça perquè els insectes s'hi puguin ficar dins dels espais buits que hi ha entre les capes.</p>
+    </div>
+
+    <div id="txt-closing">
+      <h2>Protegit per una xarxa</h2>
+      <p>Finalment, hi hem posat una xarxa subjectada amb grapes per mantenir-la recta i evitar que caiguin els materials de l'interior.</p>
+    </div>
+
+  </div><!-- /text-side -->
 
   <div id="hint">
     <div class="hint-line"></div>
@@ -306,6 +226,7 @@
     <div class="pdot" id="pd4"></div>
     <div class="pdot" id="pd5"></div>
   </div>
+
 </div>
 
 <script>
@@ -322,7 +243,7 @@
   const hint    = document.getElementById('hint');
 
   const frames = [];
-  let ready    = false;
+  let ready = false;
 
   const phases = [
     [0.05, 0.12, 0.24, 'txt1', 1],
@@ -331,11 +252,6 @@
     [0.54, 0.62, 0.74, 'txt4', 4],
     [0.71, 0.79, 0.88, 'txt5', 5],
   ];
-
-  document.querySelectorAll('.txt').forEach(el => {
-    el.style.top = '50%';
-    el.style.marginTop = '-80px';
-  });
 
   async function extractFrames() {
     const video = document.createElement('video');
@@ -349,10 +265,9 @@
       video.load();
     });
 
+    // Set canvas to native video resolution for quality drawing
     canvas.width  = video.videoWidth;
     canvas.height = video.videoHeight;
-    canvas.style.width  = '50%';
-    canvas.style.height = '100%';
 
     for (let i = 0; i < TOTAL_FRAMES; i++) {
       video.currentTime = (i / (TOTAL_FRAMES - 1)) * video.duration;
